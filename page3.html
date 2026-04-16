@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prenos Datotek</title>
+    <style>
+        body {
+            background: #1a1a1a;
+            color: white;
+            text-align: center;
+            padding: 50px;
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        h1 { color: #00ff88; margin-bottom: 10px; }
+        p { color: #888; margin-bottom: 30px; }
+        
+        .download-btn {
+            background: transparent;
+            border: 2px solid #00ff88;
+            color: #00ff88;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.2);
+        }
+
+        .download-btn:hover {
+            background: #00ff88;
+            color: #1a1a1a;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.6);
+            transform: translateY(-3px);
+        }
+
+        .back-link {
+            margin-top: 40px;
+            color: #555;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .back-link:hover { color: #fff; }
+    </style>
+</head>
+<body>
+
+    <h1>Čestitamo, zmagovalec!</h1>
+    <p>Uspel si ubraniti svojo predstavitev. Spodaj lahko preneseš obljubljene datoteke.</p>
+
+    <button class="download-btn" onclick="downloadBoth()">Prenesi vse datoteke</button>
+
+    <a href="index.html" class="back-link">Vrni se na začetek</a>
+
+    <script>
+        function downloadBoth() {
+            // Seznam datotek, ki jih želiš prenesti
+            // Pomembno: Ti datoteki morata biti v tvojem GitHub repozitoriju!
+            const files = [
+                'dokument1.pdf', 
+                'predstavitev.zip'
+            ];
+
+            files.forEach(file => {
+                const link = document.createElement('a');
+                link.href = file;
+                link.download = file;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+        }
+    </script>
+</body>
+</html>
