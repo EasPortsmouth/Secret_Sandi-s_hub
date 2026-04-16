@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Brani svojo predstavitev</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #1a1a1a;
+            color: white;
+            font-family: sans-serif;
+            overflow: hidden; /* Prevents scrolling during game */
+            text-align: center;
+            touch-action: none; /* Crucial for mobile control */
+        }
+        h2 { margin-top: 20px; color: #00ff88; font-size: 1.2rem; }
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 80vh;
+            background: #222;
+            border-bottom: 5px solid #00ff88;
+            overflow: hidden;
+        }
+        #player {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            width: 80px;
+            height: 15px;
+            background: white;
+            border-radius: 5px;
+            transform: translateX(-50%);
+        }
+        .obstacle {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: #ff4444;
+            border-radius: 3px;
+        }
+        #timer { font-size: 1.5rem; margin: 10px; }
+    </style>
+</head>
+<body>
+
+    <h2>Brani svojo predstavitev in se bori</h2>
+    <div id="timer">Preživi: 30s</div>
+    
+    <div id="game-container" id="gameArea">
+        <div id="player"></div>
+    </div>
+
+    <script>
+        const player = document.getElementById('player');
+        const container = document.getElementById('game-container');
+        const timerDisplay = document.getElementById('timer');
+        
+        let timeLeft = 30;
+        let gameActive = true;
+        let playerX = window.innerWidth / 2;
+        let obstacles = [];
+        let speedMultiplier = 1;
+
+        // Move player with touch
+        window.addEventListener('touchmove', (e) => {
+            if (!gameActive) return;
+            let touch = e.touches[0];
+            playerX = touch.clientX;
+            // Keep within bounds
+            if (playerX < 40) playerX = 40;
+            if (playerX > window.innerWidth - 40) playerX = window.innerWidth - 40;
+            player.style.left = playerX + 'px';
+        });
+
+        function createObstacle() {
+            if (!gameActive) return;
+            const obs = document.createElement('div');
+            obs.classList.add('obstacle');
+            obs.style.left = Math.random() * (window.innerWidth - 30) + 'px';
+            obs.style.top = '-40px';
+            container.appendChild(obs);
+            obstacles.push({ element: obs, top: -40, speed: (Math.random() * 3 + 2) * speedMultiplier });
+            
+            // Speed up the game over time
+            speedMultiplier += 0.05;
+            setTimeout(createObstacle, 600 / speedMultiplier);
+        }
+
+        function update() {
+            if (!gameActive) return;
+
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                let o = obstacles[i];
+                o.top += o.speed;
+                o.element.style.top = o.top + 'px';
+
+                // Collision Detection
+                let pRect = player.getBoundingClientRect();
+                let oRect = o.element.getBoundingClientRect();
+
+                if (oRect.bottom > pRect.top && 
+                    oRect.top < pRect.bottom && 
+                    oRect.right > pRect.left && 
+                    oRect.left < pRect.right) {
+                    restartGame();
+                }
+
+                // Remove off-screen
+                if (o.top > window.innerHeight) {
+                    o.element.remove();
+                    obstacles.splice(i, 1);
+                }
+            }
+            requestAnimationFrame(update);
+        }
+
+        function restartGame() {
+            alert("Zadet si bil! Poskusi znova.");
+            location.reload();
+        }
+
+        // Countdown Timer
+        const countdown = setInterval(() => {
+            timeLeft--;
+            timerDisplay.innerText = `Preživi: ${timeLeft}s`;
+            if (timeLeft <= 0) {
+                clearInterval(countdown);
+                gameActive = false;
+                alert("Uspelo ti je! Odpiram predstavitev...");
+                window.location.href = "page3.html"; // Redirects to page 3
+            }
+        }, 1000);
+
+        createObstacle();
+        update();
+    </script>
+</body>
+</html>
