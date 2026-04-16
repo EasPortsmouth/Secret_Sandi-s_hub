@@ -9,38 +9,40 @@
             margin: 0;
             background-color: #1a1a1a;
             color: white;
-            font-family: sans-serif;
-            overflow: hidden; /* Prevents scrolling during game */
+            font-family: 'Segoe UI', sans-serif;
+            overflow: hidden;
             text-align: center;
-            touch-action: none; /* Crucial for mobile control */
+            touch-action: none;
         }
-        h2 { margin-top: 20px; color: #00ff88; font-size: 1.2rem; }
+        h2 { margin-top: 20px; color: #00ff88; font-size: 1.1rem; padding: 0 10px; }
         #game-container {
             position: relative;
             width: 100vw;
-            height: 80vh;
+            height: 75vh;
             background: #222;
             border-bottom: 5px solid #00ff88;
             overflow: hidden;
+            margin-top: 10px;
         }
         #player {
             position: absolute;
-            bottom: 20px;
+            bottom: 30px;
             left: 50%;
-            width: 80px;
-            height: 15px;
+            width: 90px; /* Slightly wider for easier blocking */
+            height: 18px;
             background: white;
             border-radius: 5px;
             transform: translateX(-50%);
+            box-shadow: 0 0 15px rgba(255,255,255,0.5);
         }
         .obstacle {
             position: absolute;
-            width: 30px;
-            height: 30px;
+            width: 25px; /* Slightly smaller obstacles */
+            height: 25px;
             background: #ff4444;
-            border-radius: 3px;
+            border-radius: 4px;
         }
-        #timer { font-size: 1.5rem; margin: 10px; }
+        #timer { font-size: 1.8rem; font-weight: bold; margin: 10px; color: #00ff88; }
     </style>
 </head>
 <body>
@@ -48,7 +50,7 @@
     <h2>Brani svojo predstavitev in se bori</h2>
     <div id="timer">Preživi: 30s</div>
     
-    <div id="game-container" id="gameArea">
+    <div id="game-container">
         <div id="player"></div>
     </div>
 
@@ -61,16 +63,16 @@
         let gameActive = true;
         let playerX = window.innerWidth / 2;
         let obstacles = [];
-        let speedMultiplier = 1;
+        let speedMultiplier = 0.8; // Started lower (was 1.0)
 
         // Move player with touch
         window.addEventListener('touchmove', (e) => {
             if (!gameActive) return;
             let touch = e.touches[0];
             playerX = touch.clientX;
-            // Keep within bounds
-            if (playerX < 40) playerX = 40;
-            if (playerX > window.innerWidth - 40) playerX = window.innerWidth - 40;
+            
+            if (playerX < 45) playerX = 45;
+            if (playerX > window.innerWidth - 45) playerX = window.innerWidth - 45;
             player.style.left = playerX + 'px';
         });
 
@@ -81,11 +83,17 @@
             obs.style.left = Math.random() * (window.innerWidth - 30) + 'px';
             obs.style.top = '-40px';
             container.appendChild(obs);
-            obstacles.push({ element: obs, top: -40, speed: (Math.random() * 3 + 2) * speedMultiplier });
             
-            // Speed up the game over time
-            speedMultiplier += 0.05;
-            setTimeout(createObstacle, 600 / speedMultiplier);
+            // Slower fall speed
+            obstacles.push({ 
+                element: obs, 
+                top: -40, 
+                speed: (Math.random() * 2 + 1.5) * speedMultiplier 
+            });
+            
+            // Slower difficulty increase
+            speedMultiplier += 0.02; 
+            setTimeout(createObstacle, 800 / speedMultiplier);
         }
 
         function update() {
@@ -96,18 +104,17 @@
                 o.top += o.speed;
                 o.element.style.top = o.top + 'px';
 
-                // Collision Detection
                 let pRect = player.getBoundingClientRect();
                 let oRect = o.element.getBoundingClientRect();
 
-                if (oRect.bottom > pRect.top && 
-                    oRect.top < pRect.bottom && 
-                    oRect.right > pRect.left && 
-                    oRect.left < pRect.right) {
-                    restartGame();
+                // Added a small "grace" margin of 4px to make it more forgiving
+                if (oRect.bottom > pRect.top + 4 && 
+                    oRect.top < pRect.bottom - 4 && 
+                    oRect.right > pRect.left + 4 && 
+                    oRect.left < pRect.right - 4) {
+                    gameOver();
                 }
 
-                // Remove off-screen
                 if (o.top > window.innerHeight) {
                     o.element.remove();
                     obstacles.splice(i, 1);
@@ -116,20 +123,24 @@
             requestAnimationFrame(update);
         }
 
-        function restartGame() {
-            alert("Zadet si bil! Poskusi znova.");
+        function gameOver() {
+            gameActive = false;
+            alert("Ups! Zadel te je kvadrat. Poskusi še enkrat!");
             location.reload();
         }
 
-        // Countdown Timer
         const countdown = setInterval(() => {
+            if (!gameActive) {
+                clearInterval(countdown);
+                return;
+            }
             timeLeft--;
             timerDisplay.innerText = `Preživi: ${timeLeft}s`;
             if (timeLeft <= 0) {
                 clearInterval(countdown);
                 gameActive = false;
-                alert("Uspelo ti je! Odpiram predstavitev...");
-                window.location.href = "page3.html"; // Redirects to page 3
+                alert("Bravo! Ubranil si svojo predstavitev!");
+                window.location.href = "page3.html";
             }
         }, 1000);
 
